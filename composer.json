@@ -1,0 +1,25 @@
+{
+    "name": "geeh/twilio-wrapper",
+    "description": "A convenience wrapper around the Twilio PHP library.",
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "ghockin",
+            "email": "ghockin@twilio.com"
+        }
+    ],
+    "require-dev": {
+        "pestphp/pest": "^1.0",
+        "vimeo/psalm": "^4.6"
+    },
+    "require": {
+        "twilio/sdk": "^6",
+        "psr/http-server-middleware": "^1.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Twrap\\": "src/"
+        }
+    }
+}
