@@ -14,19 +14,60 @@ beforeEach(
     }
 );
 
-it('throws an exception when validating signature that has wrong uri and signature', function(){
-    $request = $this->getMockBuilder(\Psr\Http\Message\ServerRequestInterface::class)
-        ->getMock();
+it(
+    'throws an exception when validating signature that has wrong uri and signature',
+    function () {
+        $request = getValidRequestMock();
 
-    $request->method('getHeaderLine')
-        ->with('HTTP_X_TWILIO_SIGNATURE')
-        ->willReturn('Slartibartfast');
+        $this->validator->method('validate')
+            ->willReturn(false);
 
-    $request->method('getUri')
-        ->willReturn('https://twilio.com');
+        $this->twrapClient->validateRequest($request);
+    }
+)->throws(\Twrap\Exception\InvalidSignatureException::class);
 
-    $this->validator->method('validate')
-        ->willReturn(false);
+it(
+    'uses the querystring parameters if the request is GET',
+    function () {
+        $parameters = ['drink' => 'Pan-Galactic Gargle Blaster'];
 
-    $this->twrapClient->validateRequest($request);
-})->throws(\Twrap\Exception\InvalidSignatureException::class);
+        $request = getValidRequestMock();
+        $request->method('getMethod')
+            ->willReturn('GET');
+
+        $request->expects($this->once())
+            ->method('getQueryParams')
+            ->willReturn($parameters);
+
+        $this->validator
+            ->expects($this->once())
+            ->method('validate')
+            ->with('Slartibartfast', 'https://twilio.com', $parameters)
+            ->willReturn(true);
+
+        $this->twrapClient->validateRequest($request);
+    }
+);
+
+it(
+    'uses the body parameters if the request is POST',
+    function () {
+        $parameters = ['drink' => 'Pan-Galactic Gargle Blaster'];
+
+        $request = getValidRequestMock();
+        $request->method('getMethod')
+            ->willReturn('POST');
+
+        $request->expects($this->once())
+            ->method('getParsedBody')
+            ->willReturn($parameters);
+
+        $this->validator
+            ->expects($this->once())
+            ->method('validate')
+            ->with('Slartibartfast', 'https://twilio.com', $parameters)
+            ->willReturn(true);
+
+        $this->twrapClient->validateRequest($request);
+    }
+);

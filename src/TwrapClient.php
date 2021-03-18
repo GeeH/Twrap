@@ -8,6 +8,7 @@ use Psr\Http\Message\ServerRequestInterface;
 use Twilio\Rest\Client as TwilioClient;
 use Twilio\Security\RequestValidator;
 use Twrap\Exception\InvalidSignatureException;
+use Twrap\Middleware\TwilioWebhookMiddleware;
 
 final class TwrapClient implements TwrapClientInterface
 {
@@ -26,7 +27,7 @@ final class TwrapClient implements TwrapClientInterface
         }
 
         if (!$this->validator->validate(
-            $request->getHeaderLine('HTTP_X_TWILIO_SIGNATURE'),
+            $request->getHeaderLine(TwilioWebhookMiddleware::HEADER_NAME),
             (string)$request->getUri(),
             $data,
         )) {

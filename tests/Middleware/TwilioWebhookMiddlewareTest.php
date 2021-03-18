@@ -18,11 +18,29 @@ it('throws an exception if no signature header is found', function() {
         ->getMock();
     $requestMock->expects($this->once())
         ->method('hasHeader')
-        ->with('HTTP_X_TWILIO_SIGNATURE')
-        ->willReturn(null);
+        ->with('X-TWILIO-SIGNATURE')
+        ->willReturn(false);
 
     $handlerMock = $this->getMockBuilder(RequestHandlerInterface::class)
         ->getMock();
 
     $this->middleware->process($requestMock, $handlerMock);
 })->throws(NoHeaderSignatureException::class);
+
+it('runs the handler if the signatures match', function() {
+    $requestMock = $this->getMockBuilder(ServerRequestInterface::class)
+        ->getMock();
+    $requestMock->expects($this->once())
+        ->method('hasHeader')
+        ->with('X-TWILIO-SIGNATURE')
+        ->willReturn(true);
+
+
+    $handler = $this->getMockBuilder(RequestHandlerInterface::class)
+        ->getMock();
+    $handler->expects($this->once())
+        ->method('handle')
+        ->with($requestMock);
+
+    $this->middleware->process($requestMock, $handler);
+});

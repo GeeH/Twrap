@@ -15,24 +15,15 @@ class TwilioWebhookMiddleware implements MiddlewareInterface
 {
     public function __construct(private TwrapClientInterface $client) { }
 
+    public const HEADER_NAME = 'X-TWILIO-SIGNATURE';
+
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
     {
-        if (!$request->hasHeader('HTTP_X_TWILIO_SIGNATURE')) {
-            throw new NoHeaderSignatureException('HTTP_X_TWILIO_SIGNATURE is not found');
+        if (!$request->hasHeader(self::HEADER_NAME)) {
+            throw new NoHeaderSignatureException(self::HEADER_NAME . ' is not found');
         }
 
         $this->client->validateRequest($request);
         return $handler->handle($request);
-    }
-
-    public function handle($request, $next)
-    {
-        if (!$request->hasHeader('HTTP_X_TWILIO_SIGNATURE')) {
-            throw new NoHeaderSignatureException('HTTP_X_TWILIO_SIGNATURE is not found');
-        }
-
-        $this->client->validateRequest($request);
-
-        return $next($request);
     }
 }

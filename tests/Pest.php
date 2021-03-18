@@ -24,6 +24,9 @@
 |
 */
 
+use PHPUnit\Framework\MockObject\MockObject;
+use Psr\Http\Message\ServerRequestInterface;
+
 expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
@@ -39,7 +42,17 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+function getValidRequestMock(): MockObject
 {
-    // ..
+    $request = test()->getMockBuilder(ServerRequestInterface::class)
+        ->getMock();
+
+    $request->method('getHeaderLine')
+        ->with(Twrap\Middleware\TwilioWebhookMiddleware::HEADER_NAME)
+        ->willReturn('Slartibartfast');
+
+    $request->method('getUri')
+        ->willReturn('https://twilio.com');
+
+    return $request;
 }
