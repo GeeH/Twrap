@@ -9,5 +9,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: php-actions/composer@v5
-      - run: make all
+      - run: make test
+      - run: make psalm
 
