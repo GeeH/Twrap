@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+use Twilio\Rest\Api\V2010\Account\MessageContext;
+use Twilio\Rest\Api\V2010\Account\MessageInstance;
+use Twrap\Exception\MessageNotFoundException;
+
 beforeEach(
     function () {
         $this->client = $this->getMockBuilder(\Twilio\Rest\Client::class)
@@ -69,5 +73,52 @@ it(
             ->willReturn(true);
 
         $this->twrapClient->validateRequest($request);
+    }
+);
+
+it(
+    'throws an exception when the message does not exist',
+    function () {
+        $messageSid = 'ARTHURD3N7';
+        $this->client->expects($this->once())
+            ->method('__call')
+            ->with('messages', [$messageSid])
+            ->willReturn(null);
+
+        $this->twrapClient->getMessageDetails($messageSid);
+    }
+)->throws(MessageNotFoundException::class);
+
+it(
+    'returns a message from the API when passed a valid SID',
+    function () {
+        $messageSid = 'ARTHURD3N7';
+        $messageArray = unserialize(
+            'a:20:{s:4:"body";s:12:"Hello world!";s:11:"numSegments";s:1:"1";s:9:"direction";s:14:"outbound-reply";s:4:"from";s:13:"+447723427411";s:2:"to";s:13:"+447446188852";s:11:"dateUpdated";O:8:"DateTime":3:{s:4:"date";s:26:"2021-03-18 11:04:08.000000";s:13:"timezone_type";i:1;s:8:"timezone";s:6:"+00:00";}s:5:"price";s:8:"-0.04000";s:12:"errorMessage";N;s:3:"uri";s:104:"/2010-04-01/Accounts/ACb877821242bbaedc246328ca0a8c3fc6/Messages/SM0e3038708823b199692d85138d96e67c.json";s:10:"accountSid";s:34:"ACb877821242bbaedc246328ca0a8c3fc6";s:8:"numMedia";s:1:"0";s:6:"status";s:9:"delivered";s:19:"messagingServiceSid";N;s:3:"sid";s:34:"SM0e3038708823b199692d85138d96e67c";s:8:"dateSent";O:8:"DateTime":3:{s:4:"date";s:26:"2021-03-18 11:04:06.000000";s:13:"timezone_type";i:1;s:8:"timezone";s:6:"+00:00";}s:11:"dateCreated";O:8:"DateTime":3:{s:4:"date";s:26:"2021-03-18 11:04:06.000000";s:13:"timezone_type";i:1;s:8:"timezone";s:6:"+00:00";}s:9:"errorCode";N;s:9:"priceUnit";s:3:"USD";s:10:"apiVersion";s:10:"2010-04-01";s:15:"subresourceUris";a:2:{s:5:"media";s:110:"/2010-04-01/Accounts/ACb877821242bbaedc246328ca0a8c3fc6/Messages/SM0e3038708823b199692d85138d96e67c/Media.json";s:8:"feedback";s:113:"/2010-04-01/Accounts/ACb877821242bbaedc246328ca0a8c3fc6/Messages/SM0e3038708823b199692d85138d96e67c/Feedback.json";}}'
+        );
+
+        $messageInstance = $this->getMockBuilder(MessageInstance::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $messageInstance->expects($this->once())
+            ->method('toArray')
+            ->willReturn($messageArray);
+
+        $messageContext = $this->getMockBuilder(MessageContext::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $messageContext->expects($this->once())
+            ->method('fetch')
+            ->willReturn($messageInstance);
+
+        $this->client->expects($this->once())
+            ->method('__call')
+            ->with('messages', [$messageSid])
+            ->willReturn($messageContext);
+
+        $this->assertInstanceOf(
+            \Twrap\Model\Message::class,
+            $this->twrapClient->getMessageDetails($messageSid)
+        );
     }
 );
