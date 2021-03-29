@@ -1,5 +1,5 @@
 {
-    "name": "geeh/twilio-wrapper",
+    "name": "geeh/twrap",
     "description": "A convenience wrapper around the Twilio PHP library.",
     "minimum-stability": "stable",
     "license": "MIT",
