@@ -15,7 +15,8 @@
     },
     "require": {
         "twilio/sdk": "^6",
-        "psr/http-server-middleware": "^1.0"
+        "psr/http-server-middleware": "^1.0",
+        "brick/phonenumber": "^0.2.2"
     },
     "autoload": {
         "psr-4": {
