@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Twrap\Model;
 
+use Brick\PhoneNumber\PhoneNumber;
+
 class Message
 {
     private function __construct(
         public string $body,
         public int $numSegments,
         public string $direction,
-        public string $from,
-        public string $to,
+        public PhoneNumber $from,
+        public PhoneNumber $to,
         public ?\DateTimeImmutable $dateUpdated,
         public string $price,
         public ?string $errorMessage,
@@ -36,8 +38,8 @@ class Message
             (string)$data['body'],
             (int)$data['numSegments'],
             (string)$data['direction'],
-            (string)$data['from'],
-            (string)$data['to'],
+            PhoneNumber::parse((string)$data['from']),
+            PhoneNumber::parse((string)$data['to']),
             ($data['dateUpdated'] instanceof \DateTime)
                 ? \DateTimeImmutable::createFromMutable($data['dateUpdated'])
                 : null,
