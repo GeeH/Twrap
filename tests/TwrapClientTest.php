@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use Brick\PhoneNumber\PhoneNumber;
 use Twilio\Rest\Api\V2010\Account\MessageContext;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
 use Twrap\Exception\MessageNotFoundException;
@@ -124,34 +125,43 @@ it(
     }
 );
 
-it('returns an empty array when no messages are returned', function() {
-    $phoneNumber = '+44123456789';
+it(
+    'returns an empty array when no messages are returned',
+    function () {
+        $phoneNumberString = '+44123456789';
 
-    $this->client->messages = $this->getMockBuilder(\Twilio\Rest\Api\V2010\Account\MessageList::class)
-        ->disableOriginalConstructor()
-        ->getMock();
+        $this->client->messages = $this->getMockBuilder(\Twilio\Rest\Api\V2010\Account\MessageList::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
-    $this->client->messages
-        ->expects($this->once())
-        ->method('read')
-        ->with(['to' => $phoneNumber])
-        ->willReturn([]);
+        $this->client->messages
+            ->expects($this->once())
+            ->method('read')
+            ->with(['to' => $phoneNumberString])
+            ->willReturn([]);
 
-    $this::assertSame([], $this->twrapClient->messagesTo($phoneNumber));
-});
+        $this::assertSame([], $this->twrapClient->messagesTo(PhoneNumber::parse($phoneNumberString)));
+    }
+);
 
-it('returns an array of hydrated messages when messages are returned', function() {
-    $phoneNumber = '+44123456789';
+it(
+    'returns an array of hydrated messages when messages are returned',
+    function () {
+        $phoneNumberString = '+44123456789';
 
-    $this->client->messages = $this->getMockBuilder(\Twilio\Rest\Api\V2010\Account\MessageList::class)
-        ->disableOriginalConstructor()
-        ->getMock();
+        $this->client->messages = $this->getMockBuilder(\Twilio\Rest\Api\V2010\Account\MessageList::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
-    $this->client->messages
-        ->expects($this->once())
-        ->method('read')
-        ->with(['to' => $phoneNumber])
-        ->willReturn(include 'assets/serializedMessages.php');
+        $this->client->messages
+            ->expects($this->once())
+            ->method('read')
+            ->with(['to' => $phoneNumberString])
+            ->willReturn(include 'assets/serializedMessages.php');
 
-    $this::assertInstanceOf(Message::class, $this->twrapClient->messagesTo($phoneNumber)[0]);
-});
+        $this::assertInstanceOf(
+            Message::class,
+            $this->twrapClient->messagesTo(PhoneNumber::parse($phoneNumberString))[0]
+        );
+    }
+);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Twrap;
 
+use Brick\PhoneNumber\PhoneNumber;
+use libphonenumber\PhoneNumberFormat;
 use Psr\Http\Message\ServerRequestInterface;
 use Twilio\Rest\Api\V2010\Account\MessageInstance;
 use Twilio\Rest\Client as TwilioClient;
@@ -48,11 +50,11 @@ final class TwrapClient implements TwrapClientInterface
         return Message::fromArray($message);
     }
 
-    public function messagesTo(string $number): array
+    public function messagesTo(PhoneNumber $phoneNumber): array
     {
         $messages = $this->client
             ->messages
-            ->read(['to' => $number]);
+            ->read(['to' => $phoneNumber->format(PhoneNumberFormat::E164)]);
 
         return array_map(
             function (MessageInstance $item) {
